@@ -40,9 +40,9 @@
     }
     async function runAnalysis() {
       const logs = document.getElementById("logInput").value;
-      const res = await fetch("http://localhost:8000/analyze", {
+      const res = await fetch("https://incident-pilot.onrender.com/analyze", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ logs })
       });
       const data = await res.json();
