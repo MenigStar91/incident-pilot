@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IncidentPilot — AI Command Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen font-sans">
+  <div class="max-w-6xl mx-auto p-6">
+    <header class="flex justify-between items-center pb-6 border-b border-gray-800">
+      <h1 class="text-3xl font-extrabold text-indigo-400">🚨 IncidentPilot</h1>
+      <span class="bg-red-900/50 text-red-400 border border-red-700 px-3 py-1 rounded-full text-xs font-semibold">AI Builder Cup</span>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+      <div class="space-y-4">
+        <label class="block text-sm font-semibold text-gray-300">Paste Production Error Log</label>
+        <textarea id="logInput" rows="12" class="w-full bg-gray-900 border border-gray-800 rounded-lg p-3 font-mono text-sm text-gray-200" placeholder="Paste logs here..."></textarea>
+        <div class="flex gap-2">
+          <button onclick="loadSample()" class="bg-gray-800 hover:bg-gray-700 text-xs px-3 py-2 rounded text-gray-300">Load Sample Log</button>
+          <button onclick="runAnalysis()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 font-semibold py-2 rounded text-white">Analyze Incident</button>
+        </div>
+      </div>
+
+      <div id="reportCard" class="bg-gray-900 border border-gray-800 rounded-lg p-6 hidden">
+        <span id="repSeverity" class="px-3 py-1 text-xs font-bold rounded"></span>
+        <h2 class="text-xl font-bold text-gray-100 mt-3 mb-2" id="repCause"></h2>
+        <p class="text-sm text-gray-400 mb-4" id="repSummary"></p>
+        <h3 class="text-xs font-semibold text-indigo-400 uppercase mb-1">Key Evidence</h3>
+        <pre id="repEvidence" class="bg-black/50 p-3 rounded font-mono text-xs text-red-300 mb-4"></pre>
+        <h3 class="text-xs font-semibold text-green-400 uppercase mb-1">Remediation Steps</h3>
+        <p id="repMitigation" class="text-sm text-gray-300 whitespace-pre-line"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function loadSample() {
+      document.getElementById("logInput").value = "ERROR [user-service] ConnectionRefusedError: Could not connect to PostgreSQL master pool on 10.0.4.12:5432\n504 Gateway Time-out: upstream server failed to respond.";
+    }
+    async function runAnalysis() {
+      const logs = document.getElementById("logInput").value;
+      const res = await fetch("http://localhost:8000/analyze", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ logs })
+      });
+      const data = await res.json();
+      document.getElementById("reportCard").classList.remove("hidden");
+      document.getElementById("repSeverity").innerText = data.severity;
+      document.getElementById("repSeverity").className = `px-3 py-1 text-xs font-bold rounded ${data.severity.includes("P1") ? "bg-red-900/60 text-red-300" : "bg-yellow-900/60 text-yellow-300"}`;
+      document.getElementById("repCause").innerText = data.root_cause;
+      document.getElementById("repSummary").innerText = data.summary;
+      document.getElementById("repEvidence").innerText = data.evidence.join("\n");
+      document.getElementById("repMitigation").innerText = data.mitigation;
+    }
+  </script>
+</body>
+</html>
