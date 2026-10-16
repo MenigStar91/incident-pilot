@@ -7,6 +7,9 @@ from google.genai import types
 
 app = FastAPI()
 
+@app.get("/")
+def read_root():
+    return {"status": "online", "message": "IncidentPilot AI Backend is running successfully!"}
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
